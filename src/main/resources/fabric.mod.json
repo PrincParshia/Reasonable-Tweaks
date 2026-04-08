@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "reasonable-tweaks",
+	"version": "${version}",
+	"name": "Reasonable Tweaks",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"PrincParshia"
+	],
+	"contact": {
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "reasonable-tweaks.icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+            "princ.reasonabletweaks.client.ReasonableTweaks"
+		]
+	},
+	"mixins": [
+		"reasonable-tweaks.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.18.6",
+		"minecraft": "~26.1.1",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

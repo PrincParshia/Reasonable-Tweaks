@@ -1,0 +1,17 @@
+{
+    "required": true,
+    "package": "princ.reasonabletweaks.mixin",
+    "compatibilityLevel": "JAVA_25",
+    "client": [
+        "client.renderer.ScreenEffectRendererMixin",
+        "client.renderer.entity.EntityRendererMixin",
+        "client.renderer.feature.FlameFeatureRendererMixin",
+        "client.renderer.special.SpecialModelRenderersMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "overwrites": {
+        "requireAnnotations": true
+	}
+}

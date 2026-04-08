@@ -1,0 +1,8 @@
+{
+    "textures": {
+        "layer0": "minecraft:item/end_crystal"
+    },
+    "model": {
+        "type": "reasonable-tweaks:end_crystal"
+    }
+}
