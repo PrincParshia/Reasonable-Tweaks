@@ -19,7 +19,7 @@ public class ReasonableTweaksConstants {
     public static final String NAME = "Reasonable Tweaks";
     public static final Logger LOGGER = LoggerFactory.getLogger(NAME);
 
-    public static Identifier withDefaultNamespace(String string) {
+    public static Identifier id(String string) {
         return Identifier.fromNamespaceAndPath(NAMESPACE, string);
     }
 

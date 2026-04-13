@@ -4,42 +4,70 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.object.projectile.TridentModel;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.object.crystal.EndCrystalModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
+import net.minecraft.client.renderer.entity.state.EndCrystalRenderState;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3fc;
-import princ.reasonabletweaks.client.model.object.crystal.EndCrystalModel;
+import princ.reasonabletweaks.client.ReasonableTweaks;
 
 import java.util.function.Consumer;
 
-public class EndCrystalSpecialRenderer implements NoDataSpecialModelRenderer {
+public class EndCrystalSpecialRenderer implements SpecialModelRenderer<EndCrystalRenderState> {
+
+    private static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/entity/end_crystal/end_crystal.png");
     private final EndCrystalModel model;
 
-    public EndCrystalSpecialRenderer(final EndCrystalModel model) {
+    public EndCrystalSpecialRenderer(EndCrystalModel model) {
         this.model = model;
     }
 
-    public void submit(final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int lightCoords, final int overlayCoords, final boolean hasFoil, final int outlineColor) {
-        submitNodeCollector.submitModelPart(this.model.root(), poseStack, this.model.renderType(TridentModel.TEXTURE), lightCoords, overlayCoords, null, false, hasFoil, -1, null, outlineColor);
+    @Override
+    public EndCrystalRenderState extractArgument(ItemStack stack) {
+        EndCrystalRenderState renderState = new EndCrystalRenderState();
+        renderState.showsBottom = false;
+        renderState.beamOffset = null;
+
+        Minecraft minecraft = Minecraft.getInstance();
+        Player player = minecraft.player;
+        if (player != null) {
+            renderState.ageInTicks = player.tickCount + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        }
+        return renderState;
     }
 
-    public void getExtents(final Consumer<Vector3fc> output) {
+    @Override
+    public void submit(EndCrystalRenderState renderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, int overlayCoords, boolean hasFoil, int outlineColor) {
+        poseStack.pushPose();
+        model.setupAnim(renderState);
+        poseStack.translate(0, -0.5, 0);
+        submitNodeCollector.submitModelPart(model.root(), poseStack, model.renderType(TEXTURE), lightCoords, overlayCoords, null, false, hasFoil, -1, null, outlineColor);
+        poseStack.popPose();
+    }
+
+    @Override
+    public void getExtents(Consumer<Vector3fc> output) {
         PoseStack poseStack = new PoseStack();
-        this.model.root().getExtentsForGui(poseStack, output);
+        model.root().getExtentsForGui(poseStack, output);
     }
 
     @Environment(EnvType.CLIENT)
-    public record Unbaked() implements NoDataSpecialModelRenderer.Unbaked {
+    public record Unbaked() implements SpecialModelRenderer.Unbaked<EndCrystalRenderState> {
+
         public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(new Unbaked());
 
+        @Override
         public MapCodec<Unbaked> type() {
             return MAP_CODEC;
         }
 
-        public EndCrystalSpecialRenderer bake(final SpecialModelRenderer.BakingContext context) {
-            return new EndCrystalSpecialRenderer(new EndCrystalModel(context.entityModelSet().bakeLayer(ModelLayers.END_CRYSTAL)));
+        @Override
+        public EndCrystalSpecialRenderer bake(SpecialModelRenderer.BakingContext context) {
+            return new EndCrystalSpecialRenderer(new EndCrystalModel(context.entityModelSet().bakeLayer(ReasonableTweaks.END_CRYSTAL)));
         }
     }
 }
