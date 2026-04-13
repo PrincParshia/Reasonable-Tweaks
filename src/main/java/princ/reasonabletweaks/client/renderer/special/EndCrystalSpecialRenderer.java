@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.EndCrystalRenderState;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Quaternionf;
@@ -21,10 +20,8 @@ import princ.reasonabletweaks.client.ReasonableTweaks;
 import java.util.function.Consumer;
 
 public class EndCrystalSpecialRenderer implements SpecialModelRenderer<EndCrystalRenderState> {
-
     private static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/entity/end_crystal/end_crystal.png");
     private static final float SIN_45 = (float) Math.sin(Math.PI / 4);
-    private static final float THIRD_PI = (float) Math.PI / 3;
     private final EndCrystalModel model;
 
     public EndCrystalSpecialRenderer(EndCrystalModel model) {
@@ -32,36 +29,37 @@ public class EndCrystalSpecialRenderer implements SpecialModelRenderer<EndCrysta
     }
 
     @Override
-    public EndCrystalRenderState extractArgument(ItemStack stack) {
+    public EndCrystalRenderState extractArgument(final ItemStack stack) {
         EndCrystalRenderState renderState = new EndCrystalRenderState();
         renderState.showsBottom = false;
         renderState.beamOffset = null;
 
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
+
         if (player != null) {
             renderState.ageInTicks = player.tickCount + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         }
+
         return renderState;
     }
 
     @Override
-    public void submit(EndCrystalRenderState renderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, int overlayCoords, boolean hasFoil, int outlineColor) {
+    public void submit(final EndCrystalRenderState state, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final int lightCoords, final int overlayCoords, final boolean hasFoil, final int outlineColor) {
         poseStack.pushPose();
-
-        // noinspection ConstantConditions
-        float animationSpeed = renderState.ageInTicks * 3;
-        Quaternionf rotation = new Quaternionf().setAngleAxis(THIRD_PI, SIN_45, 0, SIN_45).rotateY(animationSpeed * Mth.DEG_TO_RAD);
-
-        model.resetPose();
-        model.base.visible = false;
-        model.outerGlass.rotateBy(Axis.YP.rotationDegrees(animationSpeed).rotateAxis(THIRD_PI, SIN_45, 0, SIN_45));
-        model.innerGlass.rotateBy(rotation);
-        model.cube.rotateBy(rotation);
-
-        poseStack.translate(0, -0.5, 0);
+        this.setupAnim(state);
+        poseStack.translate(0.5, -1, 0.5);
         submitNodeCollector.submitModelPart(model.root(), poseStack, model.renderType(TEXTURE), lightCoords, overlayCoords, null, false, hasFoil, -1, null, outlineColor);
         poseStack.popPose();
+    }
+
+    public void setupAnim(final EndCrystalRenderState state) {
+        this.model.resetPose();
+        this.model.base.visible = false;
+        float animationSpeed = state.ageInTicks * 3.0F;
+        this.model.outerGlass.rotateBy(Axis.YP.rotationDegrees(animationSpeed).rotateAxis(((float) Math.PI / 3F), SIN_45, 0.0F, SIN_45));
+        this.model.innerGlass.rotateBy((new Quaternionf()).setAngleAxis(((float) Math.PI / 3F), SIN_45, 0.0F, SIN_45).rotateY(animationSpeed * ((float) Math.PI / 180F)));
+        this.model.cube.rotateBy((new Quaternionf()).setAngleAxis(((float) Math.PI / 3F), SIN_45, 0.0F, SIN_45).rotateY(animationSpeed * ((float) Math.PI / 180F)));
     }
 
     @Override
@@ -72,7 +70,6 @@ public class EndCrystalSpecialRenderer implements SpecialModelRenderer<EndCrysta
 
     @Environment(EnvType.CLIENT)
     public record Unbaked() implements SpecialModelRenderer.Unbaked<EndCrystalRenderState> {
-
         public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(new Unbaked());
 
         @Override
@@ -81,7 +78,7 @@ public class EndCrystalSpecialRenderer implements SpecialModelRenderer<EndCrysta
         }
 
         @Override
-        public EndCrystalSpecialRenderer bake(SpecialModelRenderer.BakingContext context) {
+        public EndCrystalSpecialRenderer bake(final SpecialModelRenderer.BakingContext context) {
             return new EndCrystalSpecialRenderer(new EndCrystalModel(context.entityModelSet().bakeLayer(ReasonableTweaks.END_CRYSTAL)));
         }
     }

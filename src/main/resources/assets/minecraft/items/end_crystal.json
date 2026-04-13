@@ -1,9 +1,24 @@
 {
-  "model": {
-    "type": "minecraft:special",
-    "base": "minecraft:item/end_crystal",
     "model": {
-      "type": "reasonable-tweaks:end_crystal"
+        "type": "minecraft:select",
+        "property": "minecraft:display_context",
+        "cases": [
+            {
+                "model": {
+                    "type": "minecraft:model",
+                    "model": "minecraft:item/end_crystal"
+                },
+                "when": [
+                    "gui"
+                ]
+            }
+        ],
+        "fallback": {
+            "type": "minecraft:special",
+            "base": "minecraft:item/end_crystal",
+            "model": {
+                "type": "reasonable-tweaks:end_crystal"
+            }
+        }
     }
-  }
 }
